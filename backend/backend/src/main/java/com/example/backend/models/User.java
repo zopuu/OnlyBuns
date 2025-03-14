@@ -70,6 +70,9 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "followers")
     private Set<User> following = new HashSet<>();
 
+    @ManyToMany(mappedBy = "likes")
+    private Set<Post> likedPosts;
+
     @Override
     public List<? extends GrantedAuthority> getAuthorities() {
         return List.of(() -> "ROLE_" + role.name());
