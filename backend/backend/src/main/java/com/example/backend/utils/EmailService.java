@@ -15,7 +15,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
     public void sendVerificationEmail(String to, String token) {
-        logger.info("Sending verification email to " + to);
+        logger.info("Sending verification email to {}", to);
         String verificationUrl = "http://localhost:8081/api/users/verify?token=" + token;
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("chocolatefactory087@gmail.com");
@@ -23,6 +23,6 @@ public class EmailService {
         message.setSubject("Activate Your Account");
         message.setText("Click the ling to activate your account: " + verificationUrl);
         mailSender.send(message);
-        logger.info("Email successfully sent to " + to);
+        logger.info("Email successfully sent to {}", to);
     }
 }
