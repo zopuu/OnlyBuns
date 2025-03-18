@@ -26,16 +26,6 @@ public class UserController {
     public ResponseEntity<User> getUserById(@PathVariable UUID id){
         return ResponseEntity.ok(userService.getUserById(id));
     }
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserRegistrationDto userDto){
-        userService.createUser(userDto);
-        return ResponseEntity.ok("Registration successful! Please check your email to activate account :)");
-    }
-    @GetMapping("/verify")
-    public ResponseEntity<String> verifyAccount(@RequestParam String token){
-        userService.verifyUserAccount(token);
-        return ResponseEntity.ok("Account verification successful! You can now log in :)");
-    }
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody User updatedUser) {
         return ResponseEntity.ok(userService.updateUser(id, updatedUser));

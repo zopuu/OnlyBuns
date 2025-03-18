@@ -39,7 +39,7 @@ export default {
             }
 
             try {
-                await axios.post('http://localhost:8081/api/users/register', {
+                await axios.post('http://localhost:8081/api/auth/register', {
                     email: this.email,
                     username: this.username,
                     password: this.password,
