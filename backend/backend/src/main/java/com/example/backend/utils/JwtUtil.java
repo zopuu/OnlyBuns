@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Jwts;
@@ -21,18 +22,26 @@ public class JwtUtil {
 
     private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private static final String COOKIE_NAME = "jwt";
+    private static final int COOKIE_EXPIRY = 24 * 60 * 60;
 
-    public String generateTokenAndSetCookie(UserDetails userDetails) {
+    public void generateTokenAndSetCookie(UserDetails userDetails, HttpServletResponse response) {
         long now = System.currentTimeMillis();
 
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("roles", userDetails.getAuthorities())
                 .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + expirationMs))
+                .setExpiration(new Date(now+ (COOKIE_EXPIRY * 1000L)))
                 .signWith(secretKey)
                 .compact();
 
+        Cookie cookie = new Cookie(COOKIE_NAME, token);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setSecure(true);
+        cookie.setMaxAge(COOKIE_EXPIRY);
+
+        response.addCookie(cookie);
     }
     public boolean validateToken(String token, UserDetails userDetails) {
         String username = getUsernameFromToken(token);
@@ -46,8 +55,18 @@ public class JwtUtil {
         return expiration.before(new Date());
     }
     public Claims parseClaims(String token) {
-        return Jwts.parser()
+        return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
-                .parseClaimsJws(token).getBody();
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+    public void clearJwtCookie(HttpServletResponse response) {
+        Cookie cookie = new Cookie(COOKIE_NAME, null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        cookie.setSecure(true);
+        response.addCookie(cookie);
     }
 }

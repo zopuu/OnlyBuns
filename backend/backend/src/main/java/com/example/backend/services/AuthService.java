@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import com.example.backend.dto.LoginDto;
 import com.example.backend.dto.UserRegistrationDto;
 import com.example.backend.models.Role;
 import com.example.backend.models.User;
@@ -8,6 +9,7 @@ import com.example.backend.repositories.UserRepository;
 import com.example.backend.repositories.VerificationTokenRepository;
 import com.example.backend.utils.EmailService;
 import com.example.backend.utils.JwtUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -71,14 +73,14 @@ public class AuthService {
         userRepository.save(user);
         verificationTokenRepository.delete(verificationToken);
     }
-    public String login(String email, String password){
+    public void login(LoginDto loginDto, HttpServletResponse response){
         UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(email, password);
+                new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
 
         Authentication authentication = authenticationManager.authenticate(authToken);
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        return jwtUtil.generateToken(userDetails);
+        jwtUtil.generateTokenAndSetCookie(userDetails, response);
     }
 }

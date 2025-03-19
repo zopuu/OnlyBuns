@@ -4,6 +4,8 @@ import com.example.backend.dto.JwtResponse;
 import com.example.backend.dto.LoginDto;
 import com.example.backend.dto.UserRegistrationDto;
 import com.example.backend.services.AuthService;
+import com.example.backend.utils.JwtUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserRegistrationDto userDto){
@@ -28,12 +31,17 @@ public class AuthController {
         return ResponseEntity.ok("Account verification successful! You can now login.");
     }
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDto loginDto){
+    public ResponseEntity<?> login(@RequestBody LoginDto loginDto, HttpServletResponse response){
         try {
-            String jwtToken = authService.login(loginDto.getEmail(), loginDto.getPassword());
-            return ResponseEntity.ok(new JwtResponse(jwtToken));
+            authService.login(loginDto, response);
+            return ResponseEntity.ok("Login successful!");
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials!");
         }
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response){
+        jwtUtil.clearJwtCookie(response);
+        return ResponseEntity.ok("Logout successful!");
     }
 }

@@ -26,14 +26,13 @@ export default {
     methods: {
         async login() {
             try {
-                const response = await axios.post('http://localhost:8081/api/auth/login', {
+                await axios.post('http://localhost:8081/api/auth/login', {
                     email: this.email,
                     password: this.password
-                });
-                const token = response.data.token;
-                localStorage.setItem('jwt', token);
+                }, { withCredentials: true });
                 // Handle successful login (e.g., redirect to another page)
                 alert('Login successful!');
+                this.$router.push('/home');
             } catch (error) {
                 console.error('Login failed:', error);
                 // Handle login error (e.g., show error message)
