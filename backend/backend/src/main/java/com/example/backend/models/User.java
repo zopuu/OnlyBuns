@@ -96,4 +96,8 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return this.enabled;
     }
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
 }

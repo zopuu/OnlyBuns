@@ -7,9 +7,14 @@ import com.example.backend.models.VerificationToken;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.repositories.VerificationTokenRepository;
 import com.example.backend.utils.EmailService;
+import com.example.backend.utils.JwtUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +28,8 @@ public class AuthService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
 
     @Transactional
     public void createUser(UserRegistrationDto userDto) {
@@ -63,5 +70,15 @@ public class AuthService {
         user.setEnabled(true);
         userRepository.save(user);
         verificationTokenRepository.delete(verificationToken);
+    }
+    public String login(String email, String password){
+        UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(email, password);
+
+        Authentication authentication = authenticationManager.authenticate(authToken);
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        return jwtUtil.generateToken(userDetails);
     }
 }
