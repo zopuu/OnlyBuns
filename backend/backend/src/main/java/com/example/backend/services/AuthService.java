@@ -12,6 +12,8 @@ import com.example.backend.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +28,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
@@ -74,13 +78,16 @@ public class AuthService {
         verificationTokenRepository.delete(verificationToken);
     }
     public void login(LoginDto loginDto, HttpServletResponse response){
+        logger.debug("Entering login in AuthService");
+
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
-
+        logger.debug("Authentication token: {}", authToken);
         Authentication authentication = authenticationManager.authenticate(authToken);
-
+        logger.debug("Authenticated user: {}", authentication.getPrincipal());
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
+        logger.debug("User details: {}", userDetails);
         jwtUtil.generateTokenAndSetCookie(userDetails, response);
+        logger.debug("response: {}", response);
     }
 }

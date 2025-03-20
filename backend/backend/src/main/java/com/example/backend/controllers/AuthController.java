@@ -1,24 +1,25 @@
 package com.example.backend.controllers;
 
-import com.example.backend.dto.JwtResponse;
 import com.example.backend.dto.LoginDto;
 import com.example.backend.dto.UserRegistrationDto;
 import com.example.backend.services.AuthService;
-import com.example.backend.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtUtil jwtUtil;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserRegistrationDto userDto){
@@ -31,6 +32,7 @@ public class AuthController {
         return ResponseEntity.ok("Account verification successful! You can now login.");
     }
     @PostMapping("/login")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto, HttpServletResponse response){
         try {
             authService.login(loginDto, response);
@@ -38,10 +40,5 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials!");
         }
-    }
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response){
-        jwtUtil.clearJwtCookie(response);
-        return ResponseEntity.ok("Logout successful!");
     }
 }
