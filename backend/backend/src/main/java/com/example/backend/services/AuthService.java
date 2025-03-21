@@ -78,16 +78,10 @@ public class AuthService {
         verificationTokenRepository.delete(verificationToken);
     }
     public void login(LoginDto loginDto, HttpServletResponse response){
-        logger.debug("Entering login in AuthService");
-
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
-        logger.debug("Authentication token: {}", authToken);
         Authentication authentication = authenticationManager.authenticate(authToken);
-        logger.debug("Authenticated user: {}", authentication.getPrincipal());
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        logger.debug("User details: {}", userDetails);
         jwtUtil.generateTokenAndSetCookie(userDetails, response);
-        logger.debug("response: {}", response);
     }
 }
