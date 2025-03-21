@@ -10,6 +10,7 @@
                 <input type="password" id="password" v-model="password" required>
             </div>
             <button type="submit">Login</button>
+            <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
         </form>
     </div>
 </template>
@@ -20,7 +21,8 @@ export default {
     data() {
         return {
             email: '',
-            password: ''
+            password: '',
+            errorMessage: ''
         };
     },
     methods: {
@@ -34,8 +36,7 @@ export default {
                 alert('Login successful!');
                 this.$router.push('/home');
             } catch (error) {
-                console.error('Login failed:', error);
-                // Handle login error (e.g., show error message)
+                this.errorMessage = error.response?.data || 'Login failed!';
                 alert('Login failed!');
             }
         }

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -82,6 +83,9 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
         Authentication authentication = authenticationManager.authenticate(authToken);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        if(!userDetails.isEnabled()){
+            throw new DisabledException("User account is not verified.");
+        }
         jwtUtil.generateTokenAndSetCookie(userDetails, response);
     }
 }
